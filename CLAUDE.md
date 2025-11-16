@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 重要规则
+
+- **Git Push 策略**：如果只是文档编辑或小修改（不涉及代码构建），不要主动 git push 触发打包。仅在代码变更需要构建时才推送。
+
 ## 构建命令
 
 ### 初始化（首次构建前）
