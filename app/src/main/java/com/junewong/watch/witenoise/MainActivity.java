@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     private Runnable exitRunnable;
     private SharedPreferences prefs;
     private BroadcastReceiver updateReceiver;
+    private static boolean serviceStarted = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
                     long remaining = intent.getLongExtra("remaining", 0);
                     updateRemainingTime(remaining);
                 } else if ("PLAYBACK_FINISHED".equals(action)) {
+                    serviceStarted = false;
                     finish();
                     System.exit(0);
                 }
@@ -57,8 +59,12 @@ public class MainActivity extends AppCompatActivity {
         filter.addAction("PLAYBACK_FINISHED");
         registerReceiver(updateReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
 
-        if (savedInstanceState == null) {
+        if (!serviceStarted) {
             startPlayback();
+            serviceStarted = true;
+        } else {
+            isPlaying = true;
+            updatePlayPauseButton();
         }
     }
 
