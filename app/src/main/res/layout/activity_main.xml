@@ -1,75 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.viewpager2.widget.ViewPager2
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/viewPager"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_gradient"
-    android:padding="16dp">
-
-    <TextView
-        android:id="@+id/tvMusicName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="40dp"
-        android:text="@string/music_rain"
-        android:textColor="@color/text_primary"
-        android:textSize="20sp"
-        android:textStyle="bold" />
-
-    <ImageButton
-        android:id="@+id/btnPlayPause"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_centerInParent="true"
-        android:background="@drawable/bg_button_circle"
-        android:contentDescription="@string/playing"
-        android:scaleType="centerInside"
-        android:src="@drawable/ic_pause" />
-
-    <LinearLayout
-        android:id="@+id/layoutTimer"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/btnPlayPause"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="50dp"
-        android:background="@drawable/bg_button_circle"
-        android:clickable="true"
-        android:focusable="true"
-        android:orientation="vertical"
-        android:padding="16dp">
-
-        <TextView
-            android:id="@+id/tvTimerLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/timer_label"
-            android:textColor="@color/text_secondary"
-            android:textSize="14sp" />
-
-        <TextView
-            android:id="@+id/tvTimerValue"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="4dp"
-            android:text="@string/timer_30min"
-            android:textColor="@color/accent"
-            android:textSize="18sp"
-            android:textStyle="bold" />
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/tvRemaining"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/layoutTimer"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="24dp"
-        android:text="29:59"
-        android:textColor="@color/primary"
-        android:textSize="24sp"
-        android:textStyle="bold" />
-
-</RelativeLayout>
+    android:background="@drawable/bg_gradient" />

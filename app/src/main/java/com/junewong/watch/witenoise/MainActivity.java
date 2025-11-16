@@ -8,9 +8,15 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
 
 public class MainActivity extends AppCompatActivity {
     private ImageButton btnPlayPause;
@@ -29,13 +35,21 @@ public class MainActivity extends AppCompatActivity {
 
         prefs = getSharedPreferences("settings", MODE_PRIVATE);
         
-        btnPlayPause = findViewById(R.id.btnPlayPause);
-        tvTimerValue = findViewById(R.id.tvTimerValue);
-        tvRemaining = findViewById(R.id.tvRemaining);
-
-        btnPlayPause.setOnClickListener(v -> togglePlayPause());
-        findViewById(R.id.layoutTimer).setOnClickListener(v -> showTimerPicker());
-
+        ViewPager2 viewPager = findViewById(R.id.viewPager);
+        viewPager.setAdapter(new PagerAdapter());
+        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override
+            public void onPageSelected(int position) {
+                if (position == 0) {
+                    setupPlayPage();
+                } else {
+                    setupSettingsPage();
+                }
+            }
+        });
+        
+        viewPager.post(() -> setupPlayPage());
+        
         updateReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
@@ -57,6 +71,26 @@ public class MainActivity extends AppCompatActivity {
 
         loadTimerSetting();
         startPlayback();
+    }
+
+    private void setupPlayPage() {
+        View page = findViewById(R.id.viewPager).findViewById(R.id.btnPlayPause);
+        if (page != null) {
+            btnPlayPause = (ImageButton) page;
+            btnPlayPause.setOnClickListener(v -> togglePlayPause());
+            updatePlayPauseButton();
+        }
+    }
+
+    private void setupSettingsPage() {
+        ViewPager2 viewPager = findViewById(R.id.viewPager);
+        View page = viewPager.findViewWithTag("page_1");
+        if (page != null) {
+            tvTimerValue = page.findViewById(R.id.tvTimerValue);
+            tvRemaining = page.findViewById(R.id.tvRemaining);
+            page.findViewById(R.id.layoutTimer).setOnClickListener(v -> showTimerPicker());
+            loadTimerSetting();
+        }
     }
 
     private void startPlayback() {
@@ -177,5 +211,52 @@ public class MainActivity extends AppCompatActivity {
             unregisterReceiver(updateReceiver);
         }
         cancelExitTimer();
+    }
+
+    private class PagerAdapter extends RecyclerView.Adapter<PagerAdapter.PageViewHolder> {
+        @NonNull
+        @Override
+        public PageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+            View view = inflater.inflate(
+                viewType == 0 ? R.layout.page_play : R.layout.page_settings,
+                parent,
+                false
+            );
+            if (viewType == 1) {
+                view.setTag("page_1");
+            }
+            return new PageViewHolder(view);
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull PageViewHolder holder, int position) {
+            if (position == 0) {
+                btnPlayPause = holder.itemView.findViewById(R.id.btnPlayPause);
+                btnPlayPause.setOnClickListener(v -> togglePlayPause());
+                updatePlayPauseButton();
+            } else {
+                tvTimerValue = holder.itemView.findViewById(R.id.tvTimerValue);
+                tvRemaining = holder.itemView.findViewById(R.id.tvRemaining);
+                holder.itemView.findViewById(R.id.layoutTimer).setOnClickListener(v -> showTimerPicker());
+                loadTimerSetting();
+            }
+        }
+
+        @Override
+        public int getItemCount() {
+            return 2;
+        }
+
+        @Override
+        public int getItemViewType(int position) {
+            return position;
+        }
+
+        class PageViewHolder extends RecyclerView.ViewHolder {
+            PageViewHolder(View itemView) {
+                super(itemView);
+            }
+        }
     }
 }
