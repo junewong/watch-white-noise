@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">白噪音</string>
+    <string name="music_rain">雨声</string>
+    <string name="timer_label">定时</string>
+    <string name="remaining_label">剩余</string>
+    <string name="playing">正在播放</string>
+    <string name="paused">已暂停</string>
+    
+    <string name="timer_10min">10分钟</string>
+    <string name="timer_20min">20分钟</string>
+    <string name="timer_30min">30分钟</string>
+    <string name="timer_1hour">1小时</string>
+    <string name="timer_2hour">2小时</string>
+    <string name="timer_unlimited">不限制</string>
+    
+    <string name="select_timer">选择定时</string>
+</resources>
