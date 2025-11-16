@@ -57,7 +57,9 @@ public class MainActivity extends AppCompatActivity {
         filter.addAction("PLAYBACK_FINISHED");
         registerReceiver(updateReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
 
-        startPlayback();
+        if (savedInstanceState == null) {
+            startPlayback();
+        }
     }
 
     private void startPlayback() {
