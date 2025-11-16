@@ -85,7 +85,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updatePlayPauseButton() {
-        btnPlayPause.setImageResource(isPlaying ? R.drawable.ic_pause : R.drawable.ic_play);
+        if (btnPlayPause != null) {
+            btnPlayPause.setImageResource(isPlaying ? R.drawable.ic_pause : R.drawable.ic_play);
+        }
     }
 
     private void showTimerPicker() {
