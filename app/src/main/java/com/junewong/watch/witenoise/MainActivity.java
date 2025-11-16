@@ -37,18 +37,6 @@ public class MainActivity extends AppCompatActivity {
         
         ViewPager2 viewPager = findViewById(R.id.viewPager);
         viewPager.setAdapter(new PagerAdapter());
-        viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-            @Override
-            public void onPageSelected(int position) {
-                if (position == 0) {
-                    setupPlayPage();
-                } else {
-                    setupSettingsPage();
-                }
-            }
-        });
-        
-        viewPager.post(() -> setupPlayPage());
         
         updateReceiver = new BroadcastReceiver() {
             @Override
@@ -69,28 +57,7 @@ public class MainActivity extends AppCompatActivity {
         filter.addAction("PLAYBACK_FINISHED");
         registerReceiver(updateReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
 
-        loadTimerSetting();
         startPlayback();
-    }
-
-    private void setupPlayPage() {
-        View page = findViewById(R.id.viewPager).findViewById(R.id.btnPlayPause);
-        if (page != null) {
-            btnPlayPause = (ImageButton) page;
-            btnPlayPause.setOnClickListener(v -> togglePlayPause());
-            updatePlayPauseButton();
-        }
-    }
-
-    private void setupSettingsPage() {
-        ViewPager2 viewPager = findViewById(R.id.viewPager);
-        View page = viewPager.findViewWithTag("page_1");
-        if (page != null) {
-            tvTimerValue = page.findViewById(R.id.tvTimerValue);
-            tvRemaining = page.findViewById(R.id.tvRemaining);
-            page.findViewById(R.id.layoutTimer).setOnClickListener(v -> showTimerPicker());
-            loadTimerSetting();
-        }
     }
 
     private void startPlayback() {
@@ -134,12 +101,9 @@ public class MainActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private void loadTimerSetting() {
-        long duration = prefs.getLong("timer_duration", 30 * 60 * 1000);
-        updateTimerDisplay(duration);
-    }
-
     private void updateTimerDisplay(long duration) {
+        if (tvTimerValue == null) return;
+        
         String text;
         if (duration == 0) {
             text = getString(R.string.timer_unlimited);
@@ -160,6 +124,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateRemainingTime(long millis) {
+        if (tvRemaining == null) return;
+        
         if (millis == 0) {
             tvRemaining.setText("∞");
         } else {
@@ -239,7 +205,8 @@ public class MainActivity extends AppCompatActivity {
                 tvTimerValue = holder.itemView.findViewById(R.id.tvTimerValue);
                 tvRemaining = holder.itemView.findViewById(R.id.tvRemaining);
                 holder.itemView.findViewById(R.id.layoutTimer).setOnClickListener(v -> showTimerPicker());
-                loadTimerSetting();
+                long duration = prefs.getLong("timer_duration", 30 * 60 * 1000);
+                updateTimerDisplay(duration);
             }
         }
 
