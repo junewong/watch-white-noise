@@ -46,18 +46,24 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 ### 核心组件
 
 1. **MainActivity.java** - 主界面，负责UI交互和播放控制
-   - 启动时自动播放白噪音
-   - 播放/暂停按钮控制
-   - 定时选择和剩余时间显示
+   - 使用 ViewPager2 实现左右滑动布局
+     - 第一页：播放/暂停按钮（适配手表小屏幕）
+     - 第二页：白噪音名称、定时器设置、倒计时显示
+   - 启动时自动播放白噪音（仅首次启动）
+   - 使用静态标志位 `serviceStarted` 避免重复启动服务
+   - 通过广播接收服务状态更新（UPDATE_TIME, PLAYBACK_FINISHED, PLAYBACK_STATUS）
    - 应用生命周期管理（暂停5秒后自动退出）
 
 2. **MusicService.java** - 前台服务，负责音频播放
    - 使用 MediaPlayer 播放 R.raw.rain 音频文件
    - 循环播放和定时功能
+   - 维护 `isPlaying` 状态并通过广播同步到 MainActivity
+   - 支持 PAUSE/RESUME 操作，保持定时器状态
    - PARTIAL_WAKE_LOCK 保证后台播放
    - 淡出效果和自动退出
 
 3. **TimerPickerDialog.java** - 定时选择对话框
+   - 使用 ScrollView 支持上下滚动
    - 提供6个选项：10分钟、20分钟、30分钟、1小时、2小时、不限制
    - 使用回调接口与 MainActivity 通信
 
@@ -69,7 +75,8 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 
 ### 通信机制
 - MainActivity 与 MusicService 通过 Intent 和 Service 调用通信
-- MusicService 通过广播发送状态更新（UPDATE_TIME, PLAYBACK_FINISHED）
+- MusicService 通过广播发送状态更新（UPDATE_TIME, PLAYBACK_FINISHED, PLAYBACK_STATUS）
+- MainActivity 在 onResume 时请求服务状态同步（REQUEST_STATUS）
 - 使用 SharedPreferences 持久化定时器设置
 
 ### 省电策略
