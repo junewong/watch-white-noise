@@ -16,6 +16,7 @@ public class MusicService extends Service {
     private PowerManager.WakeLock wakeLock;
     private CountDownTimer countDownTimer;
     private long remainingTime;
+    private boolean isPlaying = false;
 
     @Override
     public void onCreate() {
@@ -42,9 +43,17 @@ public class MusicService extends Service {
         } else if ("UPDATE_TIMER".equals(action)) {
             long duration = intent.getLongExtra("duration", 30 * 60 * 1000);
             updateTimer(duration);
+        } else if ("REQUEST_STATUS".equals(action)) {
+            broadcastStatus();
         }
 
         return START_NOT_STICKY;
+    }
+
+    private void broadcastStatus() {
+        Intent intent = new Intent("PLAYBACK_STATUS");
+        intent.putExtra("isPlaying", isPlaying);
+        sendBroadcast(intent);
     }
 
     private void startPlayback(long duration) {
@@ -53,6 +62,7 @@ public class MusicService extends Service {
             mediaPlayer.setLooping(true);
         }
         mediaPlayer.start();
+        isPlaying = true;
         wakeLock.acquire();
 
         if (duration > 0) {
@@ -66,6 +76,7 @@ public class MusicService extends Service {
     private void pausePlayback() {
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
+            isPlaying = false;
         }
         if (wakeLock.isHeld()) {
             wakeLock.release();
@@ -78,6 +89,7 @@ public class MusicService extends Service {
     private void resumePlayback() {
         if (mediaPlayer != null) {
             mediaPlayer.start();
+            isPlaying = true;
             if (!wakeLock.isHeld()) {
                 wakeLock.acquire();
             }

@@ -50,6 +50,9 @@ public class MainActivity extends AppCompatActivity {
                     serviceStarted = false;
                     finish();
                     System.exit(0);
+                } else if ("PLAYBACK_STATUS".equals(action)) {
+                    isPlaying = intent.getBooleanExtra("isPlaying", false);
+                    updatePlayPauseButton();
                 }
             }
         };
@@ -57,14 +60,12 @@ public class MainActivity extends AppCompatActivity {
         IntentFilter filter = new IntentFilter();
         filter.addAction("UPDATE_TIME");
         filter.addAction("PLAYBACK_FINISHED");
+        filter.addAction("PLAYBACK_STATUS");
         registerReceiver(updateReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
 
         if (!serviceStarted) {
             startPlayback();
             serviceStarted = true;
-        } else {
-            isPlaying = true;
-            updatePlayPauseButton();
         }
     }
 
@@ -83,13 +84,14 @@ public class MainActivity extends AppCompatActivity {
             intent.setAction("PAUSE");
             startService(intent);
             isPlaying = false;
+            updatePlayPauseButton();
         } else {
             intent.setAction("RESUME");
             startService(intent);
             isPlaying = true;
+            updatePlayPauseButton();
             cancelExitTimer();
         }
-        updatePlayPauseButton();
     }
 
     private void updatePlayPauseButton() {
@@ -161,6 +163,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         cancelExitTimer();
+        if (serviceStarted) {
+            Intent intent = new Intent(this, MusicService.class);
+            intent.setAction("REQUEST_STATUS");
+            startService(intent);
+        }
     }
 
     private void startExitTimer() {
@@ -168,6 +175,7 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(this, MusicService.class);
             intent.setAction("STOP");
             startService(intent);
+            serviceStarted = false;
             finish();
         };
         exitHandler.postDelayed(exitRunnable, 5000);
