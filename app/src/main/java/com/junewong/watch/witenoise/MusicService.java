@@ -10,6 +10,9 @@ import android.media.MediaPlayer;
 import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.support.v4.media.MediaMetadataCompat;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 
 public class MusicService extends Service {
     private MediaPlayer mediaPlayer;
@@ -17,12 +20,65 @@ public class MusicService extends Service {
     private CountDownTimer countDownTimer;
     private long remainingTime;
     private boolean isPlaying = false;
+    private MediaSessionCompat mediaSession;
 
     @Override
     public void onCreate() {
         super.onCreate();
         PowerManager powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "WhiteNoise::lock");
+        
+        initMediaSession();
+    }
+
+    private void initMediaSession() {
+        mediaSession = new MediaSessionCompat(this, "WhiteNoiseService");
+        mediaSession.setCallback(new MediaSessionCompat.Callback() {
+            @Override
+            public void onPlay() {
+                if (!isPlaying) {
+                    resumePlayback();
+                }
+            }
+
+            @Override
+            public void onPause() {
+                if (isPlaying) {
+                    pausePlayback();
+                }
+            }
+
+            @Override
+            public void onStop() {
+                stopPlayback();
+            }
+        });
+        
+        mediaSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS | 
+                             MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
+        mediaSession.setActive(true);
+        
+        updateMediaMetadata();
+    }
+
+    private void updateMediaMetadata() {
+        MediaMetadataCompat metadata = new MediaMetadataCompat.Builder()
+                .putString(MediaMetadataCompat.METADATA_KEY_TITLE, "雨声白噪音")
+                .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, getString(R.string.app_name))
+                .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, -1)
+                .build();
+        mediaSession.setMetadata(metadata);
+    }
+
+    private void updatePlaybackState() {
+        int state = isPlaying ? PlaybackStateCompat.STATE_PLAYING : PlaybackStateCompat.STATE_PAUSED;
+        PlaybackStateCompat playbackState = new PlaybackStateCompat.Builder()
+                .setActions(PlaybackStateCompat.ACTION_PLAY | 
+                           PlaybackStateCompat.ACTION_PAUSE | 
+                           PlaybackStateCompat.ACTION_STOP)
+                .setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1.0f)
+                .build();
+        mediaSession.setPlaybackState(playbackState);
     }
 
     @Override
@@ -64,6 +120,7 @@ public class MusicService extends Service {
         mediaPlayer.start();
         isPlaying = true;
         wakeLock.acquire();
+        updatePlaybackState();
 
         if (duration > 0) {
             startTimer(duration);
@@ -77,6 +134,7 @@ public class MusicService extends Service {
         if (mediaPlayer != null && mediaPlayer.isPlaying()) {
             mediaPlayer.pause();
             isPlaying = false;
+            updatePlaybackState();
         }
         if (wakeLock.isHeld()) {
             wakeLock.release();
@@ -90,6 +148,7 @@ public class MusicService extends Service {
         if (mediaPlayer != null) {
             mediaPlayer.start();
             isPlaying = true;
+            updatePlaybackState();
             if (!wakeLock.isHeld()) {
                 wakeLock.acquire();
             }
@@ -201,5 +260,8 @@ public class MusicService extends Service {
     public void onDestroy() {
         super.onDestroy();
         stopPlayback();
+        if (mediaSession != null) {
+            mediaSession.release();
+        }
     }
 }

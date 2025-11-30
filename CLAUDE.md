@@ -8,23 +8,6 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 构建命令
 
-### 初始化（首次构建前）
-```bash
-./init.sh
-```
-下载 gradle-wrapper.jar，仅需执行一次。
-
-### 本地构建
-```bash
-./gradlew assembleDebug
-```
-输出位置：`app/build/outputs/apk/debug/app-debug.apk`
-
-### 清理项目
-```bash
-./gradlew clean
-```
-
 ### GitHub Actions 自动构建
 推送代码到 main 分支会自动触发构建：
 ```bash
@@ -61,6 +44,11 @@ adb install app/build/outputs/apk/debug/app-debug.apk
    - 支持 PAUSE/RESUME 操作，保持定时器状态
    - PARTIAL_WAKE_LOCK 保证后台播放
    - 淡出效果和自动退出
+   - **MediaSession 集成**：
+     - 创建 MediaSessionCompat 处理媒体控制
+     - 实现 MediaSessionCompat.Callback 响应蓝牙耳机线控
+     - 更新 MediaMetadataCompat（白噪音信息）
+     - 更新 PlaybackStateCompat（播放状态）同步到系统状态栏
 
 3. **TimerPickerDialog.java** - 定时选择对话框
    - 使用 ScrollView 支持上下滚动
