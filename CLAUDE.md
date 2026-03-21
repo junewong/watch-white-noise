@@ -17,6 +17,20 @@ git push
 ```
 在 Actions 页面下载构建产物：https://github.com/junewong/watch-white-noise/actions
 
+## 下载apk
+取得最新构建任务的id：
+```
+gh run list --limit 1
+```
+监控构建的apk状态
+```
+gh run watch <id>
+```
+使用gh命令下载构建好的文件
+```
+gh run download <id>
+```
+
 ### 安装到设备
 ```bash
 adb install app/build/outputs/apk/debug/app-debug.apk
