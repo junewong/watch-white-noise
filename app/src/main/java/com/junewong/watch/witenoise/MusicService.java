@@ -4,6 +4,8 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
+import androidx.core.app.NotificationCompat;
+import androidx.media.app.NotificationCompat.MediaStyle;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
@@ -75,6 +77,7 @@ public class MusicService extends Service {
         PlaybackStateCompat playbackState = new PlaybackStateCompat.Builder()
                 .setActions(PlaybackStateCompat.ACTION_PLAY | 
                            PlaybackStateCompat.ACTION_PAUSE | 
+                           PlaybackStateCompat.ACTION_PLAY_PAUSE |
                            PlaybackStateCompat.ACTION_STOP)
                 .setState(state, PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN, 1.0f)
                 .build();
@@ -244,10 +247,11 @@ public class MusicService extends Service {
         NotificationManager manager = getSystemService(NotificationManager.class);
         manager.createNotificationChannel(channel);
 
-        return new Notification.Builder(this, "music_channel")
+        return new NotificationCompat.Builder(this, "music_channel")
             .setContentTitle(getString(R.string.app_name))
             .setContentText(getString(R.string.playing))
             .setSmallIcon(android.R.drawable.ic_media_play)
+            .setStyle(new MediaStyle().setMediaSession(mediaSession.getSessionToken()))
             .build();
     }
 
