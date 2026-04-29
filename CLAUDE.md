@@ -49,7 +49,7 @@ adb install app/build/outputs/apk/debug/app-debug.apk
    - 启动时自动播放白噪音（仅首次启动）
    - 使用静态标志位 `serviceStarted` 避免重复启动服务
    - 通过广播接收服务状态更新（UPDATE_TIME, PLAYBACK_FINISHED, PLAYBACK_STATUS）
-   - 应用生命周期管理（暂停5秒后自动退出）
+   - 应用生命周期管理（暂停播放1分钟后自动退出进程，由 MusicService 统一管理）
 
 2. **MusicService.java** - 前台服务，负责音频播放
    - 使用 MediaPlayer 播放 R.raw.rain 音频文件
@@ -82,7 +82,7 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 - 使用 SharedPreferences 持久化定时器设置
 
 ### 省电策略
-- 暂停后5秒自动退出应用
+- 暂停播放1分钟后自动退出进程（由 MusicService 统一管理，支持手表UI和线控暂停）
 - 定时结束后自动淡出并退出
 - 使用最低功耗的后台播放模式
 

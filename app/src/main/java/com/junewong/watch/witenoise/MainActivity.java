@@ -6,8 +6,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,8 +21,6 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvTimerValue;
     private TextView tvRemaining;
     private boolean isPlaying = false;
-    private Handler exitHandler = new Handler(Looper.getMainLooper());
-    private Runnable exitRunnable;
     private SharedPreferences prefs;
     private BroadcastReceiver updateReceiver;
     private static boolean serviceStarted = false;
@@ -90,7 +86,6 @@ public class MainActivity extends AppCompatActivity {
             startService(intent);
             isPlaying = true;
             updatePlayPauseButton();
-            cancelExitTimer();
         }
     }
 
@@ -154,37 +149,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        if (!isPlaying) {
-            startExitTimer();
-        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        cancelExitTimer();
         if (serviceStarted) {
             Intent intent = new Intent(this, MusicService.class);
             intent.setAction("REQUEST_STATUS");
             startService(intent);
-        }
-    }
-
-    private void startExitTimer() {
-        exitRunnable = () -> {
-            Intent intent = new Intent(this, MusicService.class);
-            intent.setAction("STOP");
-            startService(intent);
-            serviceStarted = false;
-            finish();
-        };
-        exitHandler.postDelayed(exitRunnable, 5000);
-    }
-
-    private void cancelExitTimer() {
-        if (exitRunnable != null) {
-            exitHandler.removeCallbacks(exitRunnable);
-            exitRunnable = null;
         }
     }
 
@@ -194,7 +167,6 @@ public class MainActivity extends AppCompatActivity {
         if (updateReceiver != null) {
             unregisterReceiver(updateReceiver);
         }
-        cancelExitTimer();
     }
 
     private class PagerAdapter extends RecyclerView.Adapter<PagerAdapter.PageViewHolder> {

@@ -10,7 +10,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
@@ -23,6 +25,8 @@ public class MusicService extends Service {
     private long remainingTime;
     private boolean isPlaying = false;
     private MediaSessionCompat mediaSession;
+    private Handler exitHandler = new Handler(Looper.getMainLooper());
+    private Runnable exitRunnable;
 
     @Override
     public void onCreate() {
@@ -145,9 +149,11 @@ public class MusicService extends Service {
         if (countDownTimer != null) {
             countDownTimer.cancel();
         }
+        startAutoExitTimer();
     }
 
     private void resumePlayback() {
+        cancelAutoExitTimer();
         if (mediaPlayer != null) {
             mediaPlayer.start();
             isPlaying = true;
@@ -232,6 +238,22 @@ public class MusicService extends Service {
         }
     }
 
+    private void startAutoExitTimer() {
+        cancelAutoExitTimer();
+        exitRunnable = () -> {
+            stopPlayback();
+            sendBroadcast(new Intent("PLAYBACK_FINISHED"));
+        };
+        exitHandler.postDelayed(exitRunnable, 60 * 1000);
+    }
+
+    private void cancelAutoExitTimer() {
+        if (exitRunnable != null) {
+            exitHandler.removeCallbacks(exitRunnable);
+            exitRunnable = null;
+        }
+    }
+
     private void sendTimeUpdate(long millis) {
         Intent intent = new Intent("UPDATE_TIME");
         intent.putExtra("remaining", millis);
@@ -263,6 +285,7 @@ public class MusicService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        cancelAutoExitTimer();
         stopPlayback();
         if (mediaSession != null) {
             mediaSession.release();
